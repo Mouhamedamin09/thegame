@@ -157,7 +157,7 @@ function App() {
   return (
     <div className="App">
       <Scoreboard scores={scores} xPlaying={xPlaying} />
-      <Board board={board} onClick={handleBoxClick} />
+      <Board board={board} onClick={xPlaying &&handleBoxClick} />
       
         {gameOver &&<>  <div className='button-container'>
                         <Button onClick={resetGame} >Reset Game</Button>
