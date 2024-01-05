@@ -21,6 +21,7 @@ function App() {
   const [scores, setScores] = useState({ xScore: 0, oScore: 0 });
   const [gameOver, setGameOver] = useState(false);
   const [easymode, setEasymode] = useState(true);
+  const [startPlayer, setStartPlayer] = useState('X');
 
   // Computer ("O" player) makes a move
   useEffect(() => {
@@ -28,7 +29,6 @@ function App() {
     if (!xPlaying && !gameOver) {
       timeout = setTimeout(() => {
         const computerMoveIndex = easymode ?  getRandomNullIndex(board) :bestMove(board) ;
-        console.log(computerMoveIndex)
         if (computerMoveIndex !== -1) {
           handleBoxClick(computerMoveIndex);
         }
@@ -91,7 +91,20 @@ function App() {
   function resetGame() {
     setBoard(Array(9).fill(null));
     setGameOver(false);
-    setXPlaying(true);
+    const nextPlayer = startPlayer === 'X' ? 'O' : 'X';
+    setStartPlayer(nextPlayer);
+    setXPlaying(nextPlayer === 'X'); // Set xPlaying based on nextPlayer
+  
+    // If the next player is "O", and it's hard mode, let the computer make a random move
+    if (nextPlayer === 'O' && !easymode) {
+      const computerMoveIndex = getRandomNullIndex(board);
+      if (computerMoveIndex !== -1) {
+        setTimeout(() => {
+          const updatedBoard = board.map((value, idx) => idx === boxIdx ? (xPlaying ? "X" : "O") : value);
+          handleBoxClick(computerMoveIndex);
+        }, 0); // Timeout set to 0 to allow state updates to process
+      }
+    }
   }
 
   function bestMove(board) {
@@ -157,7 +170,7 @@ function App() {
   return (
     <div className="App">
       <Scoreboard scores={scores} xPlaying={xPlaying} />
-      <Board board={board} onClick={xPlaying &&handleBoxClick} />
+      <Board board={board} onClick={xPlaying  && handleBoxClick} />
       
         {gameOver &&<>  <div className='button-container'>
                         <Button onClick={resetGame} >Reset Game</Button>
