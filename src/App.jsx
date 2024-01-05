@@ -20,7 +20,6 @@ function App() {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [scores, setScores] = useState({ xScore: 0, oScore: 0 });
   const [gameOver, setGameOver] = useState(false);
-  const [easymode, setEasymode] = useState(true);
   const [startPlayer, setStartPlayer] = useState('X');
 
   // Computer ("O" player) makes a move
@@ -28,8 +27,13 @@ function App() {
     let timeout;
     if (!xPlaying && !gameOver) {
       timeout = setTimeout(() => {
-        const computerMoveIndex = easymode ?  getRandomNullIndex(board) :bestMove(board) ;
-        if (computerMoveIndex !== -1) {
+        if (board.every(v => v === null)) {
+          //if its first move choose random plays
+          let computerMoveIndex = Math.floor(Math.random() * (board.length - 1)) + 1; 
+          handleBoxClick(computerMoveIndex);
+
+        }else  {
+          const computerMoveIndex =bestMove(board) ;
           handleBoxClick(computerMoveIndex);
         }
       }, 1000); // Wait for 1 second (1000 milliseconds)
@@ -58,17 +62,7 @@ function App() {
     setXPlaying(!xPlaying); // Toggle the turn
   };
 
-  function getRandomNullIndex(board) {
-    const nullIndices = board
-      .map((value, index) => value === null ? index : null)
-      .filter(index => index !== null);
 
-    if (nullIndices.length === 0) {
-      return -1;
-    }
-
-    return nullIndices[Math.floor(Math.random() * nullIndices.length)];
-  }
 
   function checkWinner(board) {
     for (let i = 0; i < WIN_CONDITIONS.length; i++) {
@@ -89,22 +83,26 @@ function App() {
   }
 
   function resetGame() {
+
     setBoard(Array(9).fill(null));
     setGameOver(false);
+  
     const nextPlayer = startPlayer === 'X' ? 'O' : 'X';
     setStartPlayer(nextPlayer);
-    setXPlaying(nextPlayer === 'X'); // Set xPlaying based on nextPlayer
+    setXPlaying(nextPlayer === 'X');
   
-    // If the next player is "O", and it's hard mode, let the computer make a random move
-    if (nextPlayer === 'O' && !easymode) {
-      const computerMoveIndex = getRandomNullIndex(board);
-      if (computerMoveIndex !== -1) {
-        setTimeout(() => {
-          const updatedBoard = board.map((value, idx) => idx === boxIdx ? (xPlaying ? "X" : "O") : value);
-          handleBoxClick(computerMoveIndex);
-        }, 0); // Timeout set to 0 to allow state updates to process
-      }
+    if (nextPlayer === 'O') {
+      setTimeout(() => {
+        let computerMoveIndex;
+        
+          // Avoid index 0 on first move
+          computerMoveIndex = Math.floor(Math.random() * (board.length - 1)) + 1; 
+          console.log(computerMoveIndex) 
+        
+        handleBoxClick(computerMoveIndex);
+      }, 0);
     }
+  
   }
 
   function bestMove(board) {
@@ -130,9 +128,7 @@ function App() {
     'tie': 0
   };
 
-  function changeMode(){
-      setEasymode(!easymode)
-  }
+  
   
   function minimax(board, depth, isMaximizing) {
     let result = checkWinner(board);
@@ -169,18 +165,16 @@ function App() {
 
   return (
     <div className="App">
+      <div className='button-container' >
+        <h1 className='question'>Tic-Tac-Toe</h1>
+      </div>
       <Scoreboard scores={scores} xPlaying={xPlaying} />
       <Board board={board} onClick={xPlaying  && handleBoxClick} />
       
         {gameOver &&<>  <div className='button-container'>
                         <Button onClick={resetGame} >Reset Game</Button>
                           </div>
-                        <div className='button-container'>
-                          <h1 className='question'>Want a Difficult mode?</h1>
-                            </div>
-                        <div className='button-container'>
-                          <button onClick={changeMode} className={`mode ${easymode ? null :"click"}`} >change Mode</button>
-                           </div>
+                       
         
         </> 
                      
