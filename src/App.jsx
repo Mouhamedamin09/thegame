@@ -29,7 +29,21 @@ function App() {
       timeout = setTimeout(() => {
         if (board.every(v => v === null)) {
           //if its first move choose random plays
-          let computerMoveIndex = Math.floor(Math.random() * (board.length - 1)) + 1; 
+          let computerMoveIndex;
+
+          // 40% chance to select index 4
+          if(Math.random() < 0.7) {
+          computerMoveIndex = 4;
+          }
+        // Otherwise select random index
+        else {
+          computerMoveIndex = Math.floor(Math.random() * (board.length - 1)) + 1;
+  
+        // Ensure it doesn't select 4
+      if(computerMoveIndex >= 4) {
+        computerMoveIndex++; 
+  }
+}
           handleBoxClick(computerMoveIndex);
 
         }else  {
